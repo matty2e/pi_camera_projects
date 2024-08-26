@@ -38,37 +38,59 @@
 import time
 import valid as v
 import cv2
-from picamera import PiCamera
 
 
 def main():
-    # Naming cameras
-    num_cameras = []
-    num_cameras = 4
+    # Camera test
+    camera_index = 0
 
-    # input
 
-    capture_days = v.get_integer(
-        'When should the camera stop capturing in days?: ')
-
-    capture_hours = v.get_integer('# When should the camera stop capturing '
-                                  'in hours?: ')
-
-    capture_min = v.get_integer('# When should the camera stop capturing '
-                                'in days?: ')
-
-    project_name = v.get_string('Please name the project: ')
-
-    rendering = v.get_y_or_n('Would you like a rendered timelapse video at '
-                             'the end of each day? (Y/N): ')
-
-    in_frame = v.get_y_or_n('Is everything in focus and in frame? (Y/N): ')
-
-    start = v.get_y_or_n('Ready to start? (Y/N): ')
+    # List available cameras
+    cameras = list_cameras()
+    print("Available cameras: ", cameras)
 
     # calculations
 
     # output
+
+    # functions
+
+
+def list_cameras(max_cameras=4):
+    available_cameras = []
+    for i in range(max_cameras):
+        cap = cv2.VideoCapture(i)
+        if cap.isOpened():
+            available_cameras.append(i)
+            cap.release()  # Release the camera
+    return available_cameras
+
+
+def capture_time():
+    print("Let's figure out how long this timelapse should take.")
+    capture_days = v.get_integer(
+        'When should the camera stop capturing in number of days?: ')
+    capture_hours = v.get_integer(
+        'When should the camera stop capturing in hours?: ')
+    capture_min = v.get_integer('When should the camera stop capturing in '
+                                'minutes?: ')
+
+    return [capture_days, capture_hours, capture_min]
+
+
+def project_name():
+    get_project_name = v.get_string('Please name the project: ')
+    return get_project_name
+
+
+def focus_check():
+    in_frame = v.get_y_or_n('Is everything in focus and in frame? (Y/N): ')
+    return in_frame
+
+
+def start_capture():
+    start_cap = v.get_y_or_n('Ready to start? (Y/N): ')
+    return start_cap
 
 
 main()
