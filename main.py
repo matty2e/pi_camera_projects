@@ -7,7 +7,6 @@
 # Output: Photos, video and information about media
 # Sources: realpython.com, collaboration on github
 # ***************************************************************
-import os
 # Test run
 
 # Good morning! Ready to start a new timelapse? Good.
@@ -36,9 +35,11 @@ import os
 # Timelapse complete!
 
 import time
+import camera_Test as ct
 import valid as v
 import cv2
 import os
+import glob
 
 
 def main():
@@ -50,12 +51,13 @@ def main():
 
     print("Available cameras: ", cameras)
 
+    # Main menu
+    main_menu()
     # Set up project
 
     project_name = get_project_name()
-    in_focus = focus_check()
     start_project = start_capture()
-    create_folders = project_folders(project_name)
+    project_folders(project_name)
 
     # Capture Photos:
 
@@ -67,10 +69,10 @@ def main():
     # be a delay between pictures.
 
     # Processing Photos:
-        # Time offset for each camera
-        # Store files
-        # Name files
-        # Store files
+    # Time offset for each camera
+    # Store files
+    # Name files
+    # Store files
 
     # Output:
 
@@ -79,10 +81,22 @@ def main():
     # functions
 
 
+def main_menu():
+    print("\nWelcome to Matt's Multi-Cam Timelapse program!\n"
+          "\nEnter a number from the following menu:"
+          "\n1. Check Cameras (detected, focus, etc.)"
+          "\n2. Check Save location"
+          "\n3. Start timelapse")
+
+
+def menu_selection():
+    v.get_string("Enter number choice (1-4): ")
+
+
 def list_cameras(max_cameras=4):
     """
     Define cameras and give them names.
-    :param max_cameras: The amount of cameras that I have set up.
+    :param max_cameras: The maximum number of cameras to check for.
     :return: camera names that align with the hardware labels.
     """
     available_cameras = []
@@ -93,12 +107,14 @@ def list_cameras(max_cameras=4):
         3: "Cam-D"
     }
 
-    for i in range(max_cameras):
-        cap = cv2.VideoCapture(i)
-        if cap.isOpened():
-            camera_name = camera_names.get(i, f"camera {i}")
-            available_cameras[i] = camera_name
-            cap.release()  # Release the camera
+    # Check for the presence of the Arducam camera device files
+    camera_files = glob.glob('/dev/video*')
+    num_cameras = len(camera_files)
+
+    for i in range(min(num_cameras, max_cameras)):
+        camera_name = camera_names.get(i, f"camera {i}")
+        available_cameras.append(camera_name)
+
     return available_cameras
 
 
@@ -115,6 +131,11 @@ def capture_time():
 
 
 def get_project_name():
+    """
+    Gets project name for project file creation and naming conventions for
+    images captured.
+    :return:
+    """
     project_name = v.get_string('Please name the project: ')
     return project_name
 
@@ -135,11 +156,6 @@ def project_folders(project_name):
         os.makedirs(photos_folder, exist_ok=True)
 
     print("Project folders made.")
-
-
-def focus_check():
-    in_frame = v.get_y_or_n('Is everything in focus and in frame? (Y/N): ')
-    return in_frame
 
 
 def start_capture():
