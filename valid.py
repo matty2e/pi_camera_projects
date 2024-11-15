@@ -12,6 +12,7 @@ def get_integer(prompt: object = "Please enter an integer: "):
         except:
             print("Invalid integer.")
 
+
 def get_real(prompt="Please enter an real number: "):
     """
     Function to prompt for and return a valid real number
@@ -41,6 +42,7 @@ def get_string(prompt="Please enter a string: "):
             return chars
         else:
             print("Invalid string.")
+
 
 def get_y_or_n(prompt="Please enter 'y' or 'n': "):
     """
