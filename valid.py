@@ -61,3 +61,13 @@ def get_y_or_n(prompt="Please enter 'y' or 'n': "):
         answer = answer.lower()
 
     return answer
+
+def get_yesno_truefalse(prompt):
+    while True:
+        response = input(prompt).strip().lower()  # Normalize input
+        if response in ['y', 'yes']:
+            return True
+        elif response in ['n', 'no']:
+            return False
+        else:
+            print("Please enter 'Y' for yes or 'N' for no.")
