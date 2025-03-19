@@ -4,7 +4,7 @@
 # Description: Tests connectivity, focus and position of camera.
 # Input: strings, integers
 # Output: Photos, video and information about media
-# Sources: realpython.com, collaboration on github
+# Sources: w3schools.org, collaboration on github
 # ***************************************************************
 
 # test run
@@ -26,43 +26,76 @@
 # Great! How many photos per hour: 5
 
 # Sounds good. I will start at the top of the hour.
+
+# ___what the code is doing___:
+# capture photo
+# determine if photo is bright enough to use
+# Discard or use photo
+# Add photo to folder for the day
+# at end of the day, create timelapse video of the captures
+# add video to video folder
+
 # Please don't close this window until process is complete.
 
 # Many hours later ___________________________________________
 
 # Capture complete! Hope everything turns out great!
 
+
 import time
 import valid as v
 import os
+from datetime import datetime, timedelta
+from astral import LocationInfo
+from astral.sun import sun
+
 
 def main():
+    # constants
+
+    # Set location
+    city = LocationInfo("Portland" , "USA")
+    s = sun(city.observer, date=datetime.now())
+
+    # sunrise and sunset times
+    sunrise = s["sunrise"]
+    sunset = s["sunset"]
+
+    start_time = sunrise + timedelta(hours=1)
+    stop_time = sunset - timedelta(hours=1)
 
     # start
     welcome_mesg()
 
+    # menu
     if program_start():
         start_mesg()
-        total_cap_sec = capture_time_input()
-        print(total_cap_sec)
-        img_capture_amount(total_cap_sec)
-        clear_screen()
-        print("Sounds good. I will start at the top of the hour.\n"
-              "Please don't close this window until process is complete.")
 
-        capture_timelapse(total_cap_sec)
+        #___USE FOR GETTING PHOTO CAPTURE LENGTH___
+        # total_cap_sec = capture_time_input()
+        # photos_ph = photos_per_hour()
+        # total_photos(total_cap_sec, photos_ph)
 
+        while True:
+            now = datetime.now()
 
+            if start_time <= now <= stop_time:
+                capture()
+            else:
+                print("Something went wrong. Try again.")
 
-        print("\nCapture complete! Hope everything turns out great!")
+            time.sleep(60)
+
     else:
         print("No worries! Just start the program over when you're ready.")
 
 
-    # Calculations
-
     # Functions
 def capture_time_input():
+    """
+    Get the amount of time in various increments
+    :return: int, total amount of seconds the program will run.
+    """
     cap_days = v.get_integer("Number of days: ")
     cap_hours = v.get_integer("Number of hours: ")
     cap_min = v.get_integer("Number of minutes: ")
@@ -72,7 +105,7 @@ def capture_time_input():
     return total_seconds
 
 def capture():
-    # not in use ...
+    # using for testing
     """
     Runs the capture photo function
     :return: image, photo of subject
@@ -82,31 +115,54 @@ def capture():
     return img_cap
 
 def welcome_mesg():
+    """
+    Message that shows the program is on and running
+    :return: none
+    """
     print("Welcome to Matt's PiCam test!\n"
           "This test is for a single camera on the raspberry pi.")
 
 def program_start():
+    """
+    Confirms that the user would like to start the program, allows to start
+    over if not.
+    :return: true/false
+    """
     start_or_cancel = v.get_yesno_truefalse("Ready to start a timelapse? "
                                             "(Y/N): ")
     return start_or_cancel
 
 def start_mesg():
-    print("Enter a whole number for each time increment–days, "
+    """
+    Instructions on how to proceed with giving capture times.
+    :return: none
+    """
+    print("Enter a whole number for each time increment: days, "
           "hours, minutes, seconds.")
 
-def img_capture_amount(total_cap_seconds):
-    photos_per_hour = v.get_integer("Great! How many photos per hour: ")
+def photos_per_hour():
+    photos_ph = v.get_integer("Great! How many photos per hour: ")
+    return photos_ph
+
+def total_photos(total_cap_seconds, photos_ph):
     total_hours = (total_cap_seconds / 3600)
-    total_photos = total_hours * photos_per_hour
-    interval = 3600 / photos_per_hour if photos_per_hour > 0 else 0
-    print("That's", total_hours, "hours. That's a total of",
-          total_photos,".")
-    return photos_per_hour, interval
+    total_photo_number = total_hours * photos_ph
+    return total_photo_number
 
-def capture_timelapse(total_cap_seconds):
-    total_photos, interval = img_capture_amount(total_cap_seconds)
+def img_capture_amount(total_cap_seconds, photos_ph):
+    """
+    START HERE calculate how often a photo needs to be captured
+    :param total_cap_seconds:
+    :param photos_ph:
+    :return:
+    """
+    total_hours = (total_cap_seconds / 3600)
+    interval = total_hours / photos_ph if photos_ph > 0 else 0
+    print(f"That's {interval} per hour.")
+    return interval
 
-    for i in range(total_photos):
+def capture_timelapse(total_ph, interval):
+    for i in range(total_ph):
         # Construct the command to capture an image
         filename = f'timelapse_{i:03d}.jpg'
         command = f'libcamera-still -o {filename} --timeout 1000'
@@ -120,6 +176,10 @@ def capture_timelapse(total_cap_seconds):
 
 
 def clear_screen():
+    """
+    clears the terminal screen to keep things up to date and clutter-free
+    :return: none
+    """
     os.system('clear')
 
 
